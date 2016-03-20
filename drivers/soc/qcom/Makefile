@@ -109,10 +109,6 @@ obj-$(CONFIG_RF_CABLE_DETECT) += op_rf_cable_monitor.o
 obj-$(CONFIG_QCOM_EARLY_RANDOM)	+= early_random.o
 obj-$(CONFIG_QCOM_CX_IPEAK) += cx_ipeak.o
 obj-$(CONFIG_MSM_CACHE_M4M_ERP64) += cache_m4m_erp64.o
+obj-$(CONFIG_MSM_HAB) += hab/
+obj-$(CONFIG_QCOM_QDSS_BRIDGE) += qdss_bridge.o
 obj-$(CONFIG_STATE_NOTIFIER) += state_notifier.o
-
-# TODO: remove me b/62058353
-subdir-ccflags-y += \
-	-Wno-ignored-attributes \
-	-Wno-gcc-compat \
-	-Wno-enum-conversion
