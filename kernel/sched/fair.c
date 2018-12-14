@@ -5855,7 +5855,7 @@ unsigned long boosted_cpu_util(int cpu);
 #define boosted_cpu_util(cpu) cpu_util_freq(cpu)
 #endif
 
-#if defined(CONFIG_SMP) && defined(CONFIG_CPU_FREQ_GOV_SCHED)
+#ifdef CONFIG_SMP
 static void update_capacity_of(int cpu)
 {
 	unsigned long req_cap;
@@ -5868,9 +5868,7 @@ static void update_capacity_of(int cpu)
 	req_cap = req_cap * SCHED_CAPACITY_SCALE / capacity_orig_of(cpu);
 	set_cfs_cpu_capacity(cpu, true, req_cap);
 }
-#else
-#define update_capacity_of(X) do {} while(0)
-#endif /* SMP and CPU_FREQ_GOV_SCHED */
+#endif
 
 /*
  * The enqueue_task method is called before nr_running is
@@ -5963,9 +5961,6 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 			trace_sched_overutilized(true);
 		}
 
-	}
-
-	if (!se) {
 		/*
 		 * We want to potentially trigger a freq switch
 		 * request only for tasks that are waking up; this is
