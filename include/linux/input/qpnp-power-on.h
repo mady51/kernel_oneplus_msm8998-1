@@ -49,7 +49,7 @@ enum pon_power_off_type {
 	PON_POWER_OFF_HARD_RESET	= 0x07,
 	PON_POWER_OFF_MAX_TYPE		= 0x10,
 };
-/* yang.fangbiao@bsp, 20170910 fix the conflict when update to android8*/
+
 struct qpnp_pon {
 	struct platform_device	*pdev;
 	struct regmap		*regmap;
@@ -99,6 +99,10 @@ enum pon_restart_reason {
 	PON_RESTART_REASON_ANDROID		= 0x16,
 	PON_RESTART_REASON_MODEM		= 0x17,
 	PON_RESTART_REASON_PANIC		= 0x18,
+
+	/* 32 ~ 63 for OEMs/ODMs secific features */
+	PON_RESTART_REASON_OEM_MIN		= 0x20,
+	PON_RESTART_REASON_OEM_MAX		= 0x3f,
 };
 
 /* Define OEM reboot mode magic*/

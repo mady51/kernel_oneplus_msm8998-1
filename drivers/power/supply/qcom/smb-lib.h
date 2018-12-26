@@ -17,7 +17,6 @@
 #include <linux/irqreturn.h>
 #include <linux/regulator/driver.h>
 #include <linux/regulator/consumer.h>
-/* david.liu@bsp, 20161014 Add charging standard */
 #include <linux/power/oem_external_fg.h>
 #include <linux/wakelock.h>
 #include <linux/extcon.h>
@@ -32,7 +31,6 @@ enum print_reason {
 	PR_OP_DEBUG	= BIT(5),
 };
 
-/* david.liu@bsp, 20161014 Add charging standard */
 #define BATT_TYPE_FCC_VOTER "BATT_TYPE_FCC_VOTER"
 #define PSY_ICL_VOTER		"PSY_ICL_VOTER"
 #define TEMP_REGION_MAX               9
@@ -278,6 +276,9 @@ struct smb_charger {
 
 	/* notifiers */
 	struct notifier_block	nb;
+#if defined(CONFIG_FB)
+	struct notifier_block		fb_notif;
+#endif /* CONFIG_FB */
 
 	/* parallel charging */
 	struct parallel_params	pl;
@@ -311,7 +312,6 @@ struct smb_charger {
 	struct work_struct	rdstd_cc2_detach_work;
 	struct delayed_work	hvdcp_detect_work;
 	struct delayed_work	ps_change_timeout_work;
-/* david.liu@bsp, 20160926 Add dash charging */
 	struct delayed_work rechk_sw_dsh_work;
 	struct delayed_work	re_kick_work;
 	struct delayed_work	recovery_suspend_work;
@@ -333,7 +333,6 @@ struct smb_charger {
 	struct delayed_work	bb_removal_work;
 
 	/* cached status */
-/* david.liu@bsp, 20160926 Add dash charging */
 	int				BATT_TEMP_T0;
 	int				BATT_TEMP_T1;
 	int				BATT_TEMP_T2;
@@ -535,7 +534,6 @@ int smblib_set_prop_batt_capacity(struct smb_charger *chg,
 				const union power_supply_propval *val);
 int smblib_set_prop_system_temp_level(struct smb_charger *chg,
 				const union power_supply_propval *val);
-/* david.liu@bsp, 20160926 Add dash charging */
 int get_prop_fast_adapter_update(struct smb_charger *chg);
 void op_handle_usb_plugin(struct smb_charger *chg);
 int op_rerun_apsd(struct smb_charger *chg);

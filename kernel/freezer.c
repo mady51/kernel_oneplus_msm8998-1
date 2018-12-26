@@ -72,7 +72,7 @@ bool __refrigerator(bool check_kthr_stop)
 		current->flags |= PF_FROZEN;
 		if (!freezing(current) ||
                 //huruihuan add for kill task in D status
-                    (check_kthr_stop && kthread_should_stop()) || current->kill_flag)
+		    (check_kthr_stop && kthread_should_stop()) || current->kill_flag)
 			current->flags &= ~PF_FROZEN;
 		spin_unlock_irq(&freezer_lock);
 

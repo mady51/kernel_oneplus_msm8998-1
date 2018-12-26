@@ -41,6 +41,10 @@
 
 #define MAX_NR_GPIO 300
 #define PS_HOLD_OFFSET 0x820
+static int resume_wakeup_flag = 0;
+bool fp_irq_cnt;
+
+bool need_show_pinctrl_irq;
 
 static int resume_wakeup_flag = 0;
 bool need_show_pinctrl_irq;
@@ -461,7 +465,6 @@ static int msm_gpio_get_dash(struct gpio_chip *chip, unsigned offset)
 	val = readl_dash(pctrl->regs + g->io_reg);
 	return !!(val & BIT(g->in_bit));
 }
-
 static void msm_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 {
 	const struct msm_pingroup *g;
@@ -481,6 +484,27 @@ static void msm_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	writel(val, pctrl->regs + g->io_reg);
 
 	spin_unlock_irqrestore(&pctrl->lock, flags);
+}
+/*2017-08-22 add for dash adapter update*/
+static void msm_gpio_set_dash(struct gpio_chip *chip,
+			unsigned offset, int value)
+{
+	const struct msm_pingroup *g;
+	struct msm_pinctrl *pctrl = container_of(chip,
+						struct msm_pinctrl, chip);
+	u32 val;
+
+	/*pr_err("%s enter\n", __func__);*/
+	g = &pctrl->soc->groups[offset];
+
+	/*spin_lock_irqsave(&pctrl->lock, flags);*/
+	if (value)
+		val = BIT(g->out_bit);
+	else
+		val = ~BIT(g->out_bit);
+	writel_dash(val, pctrl->regs + g->io_reg);
+
+	/*spin_unlock_irqrestore(&pctrl->lock, flags);*/
 }
 
 /*2017-08-22 add for dash adapter update*/
@@ -863,7 +887,7 @@ static void msm_gpio_irq_handler(struct irq_desc *desc)
 	int handled = 0;
 	u32 val;
 	int i;
-	char irq_name[16] = {0};
+       char irq_name[16] = {0};
 
 	chained_irq_enter(chip, desc);
 
@@ -882,17 +906,15 @@ static void msm_gpio_irq_handler(struct irq_desc *desc)
 			/* ++add by lyb@bsp for printk wakeup irqs */
 			if (!!need_show_pinctrl_irq) {
 				need_show_pinctrl_irq = false;
-				set_resume_wakeup_flag(irq_pin);
 				strlcpy(irq_name,
 				irq_to_desc(irq_pin)->action->name, 16);
 				if (strnstr(irq_name,
 					"soc:fpc_fpc1020", 16) != NULL ||
 					strnstr(irq_name, "gf_fp", 6) != NULL) {
 					fp_irq_cnt = true;
-#ifdef CONFIG_CPU_FREQ_ONEPLUS_QOS
 					c0_cpufreq_limit_queue();
-#endif
 				}
+				set_resume_wakeup_flag(irq_pin);
 				pr_warn("hwirq %s [irq_num=%d ]triggered\n",
 				irq_to_desc(irq_pin)->action->name, irq_pin);
 				log_wakeup_reason(irq_pin);

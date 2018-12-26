@@ -37,7 +37,9 @@ mdss-dsi-objs += msm_mdss_io_8974.o
 mdss-dsi-objs += mdss_dsi_phy.o
 mdss-dsi-objs += mdss_dsi_phy_v3.o
 mdss-dsi-objs += mdss_dsi_clk.o
-mdss-dsi-objs += mdss_dsi_iris2p_lightup.o
+ifeq ($(CONFIG_IRIS2P_FULL_SUPPORT),y)
+mdss-dsi-objs += mdss_dsi_iris2p_lightup.o mdss_dsi_iris2p_def.o
+endif
 
 obj-$(CONFIG_FB_MSM_MDSS) += mdss-dsi.o
 obj-$(CONFIG_FB_MSM_MDSS) += mdss_panel.o

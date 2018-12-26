@@ -1526,6 +1526,7 @@ enable_reg:
 	else
 		pd->vbus_enabled = true;
 
+
 	return ret;
 }
 
@@ -1730,7 +1731,6 @@ static void usbpd_sm(struct work_struct *w)
 		if (ret) {
 			pd->caps_count++;
 
-/* david.liu@bsp, 201710523 Fix C2C swap failed with Pixel */
 			if (pd->caps_count < 10 && pd->current_dr == DR_DFP) {
 				start_usb_host(pd, true);
 			} else if (pd->caps_count >= 10) {
@@ -1741,7 +1741,6 @@ static void usbpd_sm(struct work_struct *w)
 			break;
 		}
 
-/* david.liu@bsp, 201710523 Fix C2C swap failed with Pixel */
 		usbpd_info(&pd->dev, "Start host snd msg ok\n");
 		if (pd->current_dr == DR_DFP)
 			start_usb_host(pd, true);
@@ -2445,7 +2444,6 @@ static int psy_changed(struct notifier_block *nb, unsigned long evt, void *ptr)
 			return 0;
 		}
 	}
-
 	pd->typec_mode = typec_mode;
 
 	usbpd_err(&pd->dev, "typec mode:%d present:%d type:%d orientation:%d\n",

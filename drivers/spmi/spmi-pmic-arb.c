@@ -123,6 +123,7 @@ enum pmic_arb_channel {
 static int resume_qpnp_kpdpwr_wakeup_flag = 0;
 struct pmic_arb_ver_ops;
 
+static int resume_qpnp_kpdpwr_wakeup_flag = 0;
 struct apid_data {
 	u16		ppid;
 	u8		write_owner;
@@ -579,7 +580,6 @@ static void periph_interrupt(struct spmi_pmic_arb *pa, u16 apid, bool show)
 	u8 per = pa->apid_data[apid].ppid & 0xFF;
 
         init_qpnp_kpdpwr_resume_wakeup_flag();
-
 	status = readl_relaxed(pa->intr + pa->ver_ops->irq_status(apid));
 	while (status) {
 		id = ffs(status) - 1;

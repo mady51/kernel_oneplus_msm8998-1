@@ -536,6 +536,7 @@ int wcd9xxx_irq_init(struct wcd9xxx_core_resource *wcd9xxx_res)
 			wcd9xxx_res->irq_masks_cur[i]);
 	}
 
+	/* not use elect_remove, so forbiden wcd_mbhc_hs_rem_irq */
 	regmap_write(wcd9xxx_res->wcd_core_regmap,
 			0x00EA, 0x2);
 

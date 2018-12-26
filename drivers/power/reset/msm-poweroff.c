@@ -163,6 +163,7 @@ static void set_dload_mode(int on)
 		qpnp_pon_set_restart_reason(PON_RESTART_REASON_PANIC);
 	if (!on)
 		scm_disable_sdi();
+
 	dload_mode_enabled = on;
 }
 

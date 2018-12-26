@@ -31,6 +31,7 @@
 #define NETLINK_INET_DIAG	NETLINK_SOCK_DIAG
 #define NETLINK_ADB         23
 
+
 #define MAX_LINKS 32		
 
 struct sockaddr_nl {

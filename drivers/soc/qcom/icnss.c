@@ -50,7 +50,6 @@
 #include <soc/qcom/ramdump.h>
 #include <linux/project_info.h>
 static u32 fw_version;
-static u32 fw_version_ext;
 
 #include "wlan_firmware_service_v01.h"
 
@@ -4333,9 +4332,8 @@ static int icnss_get_vbatt_info(struct icnss_priv *priv)
 }
 
 /* Initial and show wlan firmware build version */
-void cnss_set_fw_version(u32 version, u32 ext) {
+void cnss_set_fw_version(u32 version) {
         fw_version = version;
-        fw_version_ext = ext;
 }
 EXPORT_SYMBOL(cnss_set_fw_version);
 
@@ -4344,9 +4342,8 @@ static ssize_t cnss_version_information_show(struct device *dev,
 {
         if (!penv)
                 return -ENODEV;
-        return scnprintf(buf, PAGE_SIZE, "%u.%u.%u.%u.%u\n", (fw_version & 0xf0000000) >> 28,
-        (fw_version & 0xf000000) >> 24, (fw_version & 0xf00000) >> 20, fw_version & 0x7fff,
-        (fw_version_ext & 0xf0000000) >> 28);
+        return scnprintf(buf, PAGE_SIZE, "%u.%u.%u.%u\n", (fw_version & 0xf0000000) >> 28,
+        (fw_version & 0xf000000) >> 24, (fw_version & 0xf00000) >> 20, fw_version & 0x7fff);
 }
 
 static DEVICE_ATTR(cnss_version_information, 0444,

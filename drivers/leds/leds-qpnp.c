@@ -253,111 +253,7 @@
 #define NUM_KPDBL_LEDS			4
 #define KPDBL_MASTER_BIT_INDEX		0
 
-/*taokai@bsp add for indicator shows when Mobile phone completely shut down*/
 static u8	shutdown_enable = 0;
-
-#define LED_SPEED_MAX			20
-#define LED_SPEED_STOCK_MODE	0
-#define LED_SPEED_CONT_MODE		1
-#define LED_INTENSITY_MAX		100
-#define LED_INTENSITY_STOCK		0
-
-#define LED_CUSTOM_PAUSE_HI		1400
-#define LED_CUSTOM_PAUSE_LO		2000
-#define LED_CUSTOM_RAMP_STEP	90
-#define LED_CUSTOM_PWM_US		1000
-
-
-int led_enable_fade = 1;	// default is fading
-int led_intensity = 0;		// default is stock intensity
-int led_speed = 0;			// default is stock speed
-
-u32 convert_pause_hi_store (u32 value)
-{
-	pr_debug("Boeffla-LED: pause_hi orig = %d\n", value);
-
-	// calculate new pause time if speed is not set to stock
-	if (led_speed != LED_SPEED_STOCK_MODE)
-		value = LED_CUSTOM_PAUSE_HI / led_speed;
-
-	pr_debug("Boeffla-LED: pause_hi new = %d\n", value);
-	return value;
-}
-
-u32 convert_pause_lo_store (u32 value)
-{
-	pr_debug("Boeffla-LED: pause_lo orig = %d\n", value);
-
-	// calculate new pause time if speed is not set to stock
-	if (led_speed != LED_SPEED_STOCK_MODE)
-		value = LED_CUSTOM_PAUSE_LO / led_speed;
-
-	pr_debug("Boeffla-LED: pause_lo new = %d\n", value);
-	return value;
-}
-
-u32 convert_ramp_ms_store (u32 ramp_step_ms)
-{
-	pr_debug("Boeffla-LED: ramp_step_ms orig = %d\n", ramp_step_ms);
-
-	// no fading = disable ramp times
-	if (led_enable_fade == 0)
-		return 1;
-		
-	// speed is set to stock = take roms ramp times
-	if (led_speed == LED_SPEED_STOCK_MODE)
-		return ramp_step_ms;
-		
-	// calculate new ramp time
-	ramp_step_ms = LED_CUSTOM_RAMP_STEP / led_speed;
-
-	pr_debug("Boeffla-LED: ramp_step_ms new = %d\n", ramp_step_ms);
-	return ramp_step_ms;
-}
-
-u32 convert_pwm_us (u32 pwm_us)
-{
-	pr_debug("Boeffla-LED: pwm_us orig = %d\n", pwm_us);
-
-	// speed is set to stock = take roms ramp times
-	if (led_speed == LED_SPEED_STOCK_MODE)
-		return pwm_us;
-
-	// fix value for pwm us
-	pwm_us = LED_CUSTOM_PWM_US;
-
-	pr_debug("Boeffla-LED: pwm_us new = %d\n", pwm_us);
-	return pwm_us;
-}
-
-int check_for_notification_led(struct led_classdev *led_cdev)
-{
-	if ((strcmp(led_cdev->name, "red") == 0) ||
-		(strcmp(led_cdev->name, "green") == 0) ||
-		(strcmp(led_cdev->name, "blue") == 0))
-		return 1;
-
-	return 0;
-}
-
-int convert_brightness (int brightness)
-{
-	pr_debug("Boeffla-LED: brightness orig = %d\n", brightness);
-
-	// 0 value is stock
-	if (led_intensity == LED_INTENSITY_STOCK)
-		return brightness;
-
-	// 1 value is switch off in any case
-	if (led_intensity == 1)
-		return 0;
-	
-	// calculate dimmed value	
-	brightness = (brightness * led_intensity) / LED_INTENSITY_MAX;
-
-	pr_debug("Boeffla-LED: brightness new = %d\n", brightness);
-	return brightness;
-}
 
 /**
  * enum qpnp_leds - QPNP supported led ids
@@ -2686,10 +2582,11 @@ static ssize_t duty_pcts_store(struct device *dev,
 	char *buffer;
 	ssize_t ret;
 	int rets;
+	//int i = 0;
 	int max_duty_pcts;
 	struct pwm_config_data *pwm_cfg;
 	u32 previous_num_duty_pcts;
-	int value;
+	//int value;
 	int *previous_duty_pcts;
 
 	led = container_of(led_cdev, struct qpnp_led_data, cdev);
@@ -2721,13 +2618,14 @@ static ssize_t duty_pcts_store(struct device *dev,
 	buffer = (char *)buf;
 
 	rets= sscanf((const char *)buffer,
-		"%x %x %x %x %x %x %x %x %x %x %x ",
+		"bean %x %x %x %x %x %x %x %x %x %x %x ",
 			    &pwm_cfg->old_duty_pcts[0], &pwm_cfg->old_duty_pcts[1],
 			    &pwm_cfg->old_duty_pcts[2], &pwm_cfg->old_duty_pcts[3],
 			    &pwm_cfg->old_duty_pcts[4], &pwm_cfg->old_duty_pcts[5],
 			    &pwm_cfg->old_duty_pcts[6],&pwm_cfg->old_duty_pcts[7],
 			    &pwm_cfg->old_duty_pcts[8], &pwm_cfg->old_duty_pcts[9],
 			    &pwm_cfg->old_duty_pcts[10]);
+	printk("bean set rets = %d\n",rets);
 	if(rets != 11)
 	{
 		pr_err("duty_pcts_store: Invalid paramter:%d\n", rets);
@@ -2735,6 +2633,7 @@ static ssize_t duty_pcts_store(struct device *dev,
 	}
 
 	num_duty_pcts = 11;
+
 
 	if (num_duty_pcts >= max_duty_pcts) {
 		dev_err(&led->pdev->dev,
@@ -2889,87 +2788,6 @@ static ssize_t blink_store(struct device *dev,
 	return count;
 }
 
-static ssize_t show_led_fade(struct device *dev,
-                    struct device_attribute *attr, char *buf)
-{
-	switch(led_enable_fade) 
-	{
-		case 0:		
-			return sprintf(buf, "%d - off\n", led_enable_fade);
-		case 1:		
-			return sprintf(buf, "%d - on\n", led_enable_fade);
-		default:	
-			return sprintf(buf, "%d - undefined\n", led_enable_fade);
-	}
-}
-
-static ssize_t store_led_fade(struct device *dev,
-					struct device_attribute *devattr,
-					const char *buf, size_t count)
-{
-	int enabled = -1; /* default to not set a new value */
-
-	sscanf(buf, "%d", &enabled);
-
-	switch(enabled) /* Accept only if 0 or 1 */
-	{ 
-		case 0:
-		case 1:		
-			led_enable_fade = enabled;
-		default:	
-			return count;
-	}
-}
-
-static ssize_t show_led_intensity(struct device *dev,
-                    struct device_attribute *attr, char *buf)
-{
-	switch(led_intensity) 
-	{
-		case  0:	
-			return sprintf(buf, "%d - Stock intensity\n", led_intensity);
-		default:
-			return sprintf(buf, "%d - Custom intensity\n", led_intensity);
-	}
-}
-
-static ssize_t store_led_intensity(struct device *dev,
-					struct device_attribute *devattr,
-					const char *buf, size_t count)
-{
-	int new_intensity = -1; /* default to not set a new value */
-
-	sscanf(buf, "%d", &new_intensity);
-
-	/* check for valid data */
-	if (new_intensity >= 0 && new_intensity <= LED_INTENSITY_MAX)
-		led_intensity = new_intensity;
-
-	return count;
-}
-
-static ssize_t show_led_speed(struct device *dev,
-                    struct device_attribute *attr, char *buf)
-{
-	return sprintf(buf, "%d - speed\n", led_speed);
-}
-
-static ssize_t store_led_speed(struct device *dev,
-					struct device_attribute *devattr,
-					const char *buf, size_t count)
-{
-	int new_led_speed = -1; /* default to not set a new value */
-
-	sscanf(buf, "%d", &new_led_speed);
-
-	/* check for valid data */
-	if ((new_led_speed >= 0) && (new_led_speed <= LED_SPEED_MAX))
-		led_speed = new_led_speed;
-		
-	return count;
-}
-
-/*taokai@bsp add for indicator shows when Mobile phone completely shut down*/
 static ssize_t shutdown_enable_show(struct device *dev,
 				 struct device_attribute *attr,
 				 char *buf)
@@ -3003,130 +2821,7 @@ static ssize_t shutdown_enable_store(struct device *dev,
 	}
 
 	return count;
-}
 
-static inline void rgb_lock_leds(struct rgb_sync *rgb)
-{
-	int i;
-
-	for (i = 0; i < 3; i++) {
-		if (rgb->led_data[i]) {
-			flush_work(&rgb->led_data[i]->work);
-			mutex_lock(&rgb->led_data[i]->lock);
-		}
-	}
-}
-
-static inline void rgb_unlock_leds(struct rgb_sync *rgb)
-{
-	int i;
-
-	for (i = 0; i < 3; i++) {
-		if (rgb->led_data[i]) {
-			mutex_unlock(&rgb->led_data[i]->lock);
-		}
-	}
-}
-
-static void rgb_disable_leds(struct rgb_sync *rgb)
-{
-	int i;
-	struct qpnp_led_data *led;
-
-	//TODO Implement synchronized off
-	for (i = 0; i < 3; i++) {
-		led = rgb->led_data[i];
-		if (led && led->rgb_cfg->pwm_cfg->pwm_enabled) {
-			led->rgb_cfg->pwm_cfg->mode =
-				led->rgb_cfg->pwm_cfg->default_mode;
-			led->rgb_cfg->pwm_cfg->blinking = false;
-			pwm_disable(led->rgb_cfg->pwm_cfg->pwm_dev);
-			led->rgb_cfg->pwm_cfg->pwm_enabled = 0;
-		}
-	}
-}
-
-/**
- * Should only be called when all RGB leds are off
- */
-static int rgb_enable_leds(struct rgb_sync *rgb)
-{
-	struct qpnp_led_data *led;
-	struct pwm_device *pwm_dev[3];
-	int i, rc;
-
-	for (i = 0; i < 3; i++) {
-		led = rgb->led_data[i];
-		if (!led)
-			continue;
-
-		led->rgb_cfg->pwm_cfg->mode = LPG_MODE;
-		pwm_free(led->rgb_cfg->pwm_cfg->pwm_dev);
-		qpnp_pwm_init(led->rgb_cfg->pwm_cfg, led->pdev, led->cdev.name);
-		pwm_dev[i] = led->rgb_cfg->pwm_cfg->pwm_dev;
-	}
-
-	if (i == 0)
-		return 0;
-
-	rc = pwm_enable_synchronized(pwm_dev, i);
-	if (rc) {
-		dev_err(&rgb->pdev->dev, "Unable to enable pwms\n");
-		return rc;
-	}
-
-	for (i = 0; i < 3; i++) {
-		led = rgb->led_data[i];
-		if (!led)
-			continue;
-		led->rgb_cfg->pwm_cfg->blinking = true;
-		led->rgb_cfg->pwm_cfg->pwm_enabled = 1;
-	}
-
-	return rc;
-}
-
-static ssize_t rgb_blink_store(struct device *dev,
-	struct device_attribute *attr,
-	const char *buf, size_t count)
-{
-	struct rgb_sync *rgb_sync;
-	struct qpnp_led_data *led;
-	unsigned long blinking;
-	struct led_classdev *led_cdev = dev_get_drvdata(dev);
-	ssize_t rc = -EINVAL, i;
-	u8 enable = 0;
-
-	rc = kstrtoul(buf, 10, &blinking);
-	if (rc)
-		return rc;
-	rgb_sync = container_of(led_cdev, struct rgb_sync, cdev);
-
-	rgb_lock_leds(rgb_sync);
-	for (i = 0; i < 3; i++) {
-		if (rgb_sync->led_data[i]) {
-			led = rgb_sync->led_data[i];
-			enable |= led->rgb_cfg->enable;
-		}
-	}
-
-	if (!led)
-		return count;
-
-	rc = qpnp_led_masked_write(led,
-		RGB_LED_EN_CTL(led->base),
-		enable, blinking ? enable : RGB_LED_DISABLE);
-	if (rc) {
-		dev_err(&led->pdev->dev,
-			"Failed to write led enable reg\n");
-		rgb_unlock_leds(rgb_sync);
-		return rc;
-	}
-	rgb_disable_leds(rgb_sync);
-	if (blinking)
-		rgb_enable_leds(rgb_sync);
-	rgb_unlock_leds(rgb_sync);
-	return count;
 }
 
 static DEVICE_ATTR(led_mode, 0664, NULL, led_mode_store);
@@ -3139,12 +2834,7 @@ static DEVICE_ATTR(ramp_step_ms, 0664, NULL, ramp_step_ms_store);
 static DEVICE_ATTR(lut_flags, 0664, NULL, lut_flags_store);
 static DEVICE_ATTR(duty_pcts, 0664, NULL, duty_pcts_store);
 static DEVICE_ATTR(blink, 0664, NULL, blink_store);
-static DEVICE_ATTR(led_fade, S_IWUSR | S_IRUGO, show_led_fade, store_led_fade);
-static DEVICE_ATTR(led_intensity, S_IWUSR | S_IRUGO, show_led_intensity, store_led_intensity);
-static DEVICE_ATTR(led_speed, S_IWUSR | S_IRUGO, show_led_speed, store_led_speed);
 static DEVICE_ATTR(enable, 0644, shutdown_enable_show, shutdown_enable_store);
-static DEVICE_ATTR(rgb_blink, 0664, NULL, rgb_blink_store);
-
 static struct attribute *led_attrs[] = {
 	&dev_attr_led_mode.attr,
 	&dev_attr_strobe.attr,
@@ -4695,7 +4385,6 @@ static int qpnp_leds_remove(struct platform_device *pdev)
 	return 0;
 }
 
-/*taokai@bsp add for indicator shows when Mobile phone completely shut down*/
 static void qpnp_leds_shutdown(struct platform_device *pdev)
 {
 	struct qpnp_led_data *led_array = dev_get_drvdata(&pdev->dev);

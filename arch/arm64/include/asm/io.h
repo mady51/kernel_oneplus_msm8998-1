@@ -122,13 +122,11 @@ static inline u64 __raw_readq_no_log(const volatile void __iomem *addr)
 	volatile void __iomem *_a = (a); \
 	__raw_write##_t##_no_log((v), _a); \
 	})
-
 #define __raw_writeb(v, a)	__raw_write_logged((v), a, b)
 #define __raw_writew(v, a)	__raw_write_logged((v), a, w)
 #define __raw_writel(v, a)	__raw_write_logged((v), a, l)
 /*2017-08-22 add for dash adapter update*/
 #define __raw_writel_dash(v, a)	__raw_write_logged_dash((v), a, l)
-
 #define __raw_writeq(v, a)	__raw_write_logged((v), a, q)
 
 #define __raw_read_logged(a, _l, _t)    ({ \
@@ -150,7 +148,6 @@ static inline u64 __raw_readq_no_log(const volatile void __iomem *addr)
 	const volatile void __iomem *_a = (const volatile void __iomem *)(a); \
 	__a = __raw_read##_l##_no_log(_a); \
 	})
-
 #define __raw_readb(a)		__raw_read_logged((a), b, u8)
 #define __raw_readw(a)		__raw_read_logged((a), w, u16)
 #define __raw_readl(a)		__raw_read_logged((a), l, u32)
@@ -185,7 +182,6 @@ static inline u64 __raw_readq_no_log(const volatile void __iomem *addr)
 #define writel_relaxed_dash(v, c)	( \
 	(void)__raw_writel_dash((__force u32)cpu_to_le32(v),\
 	(c)))
-
 #define writeq_relaxed(v,c)	((void)__raw_writeq((__force u64)cpu_to_le64(v),(c)))
 
 #define readb_relaxed_no_log(c)	({ u8 __v = __raw_readb_no_log(c); __v; })
@@ -208,7 +204,6 @@ static inline u64 __raw_readq_no_log(const volatile void __iomem *addr)
 #define readl(c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
 /*2017-08-22 add for dash adapter update*/
 #define readl_dash(c)		({ u32 __v = readl_relaxed_dash(c);  __v; })
-
 #define readq(c)		({ u64 __v = readq_relaxed(c); __iormb(); __v; })
 
 #define writeb(v,c)		({ __iowmb(); writeb_relaxed((v),(c)); })
@@ -216,7 +211,6 @@ static inline u64 __raw_readq_no_log(const volatile void __iomem *addr)
 #define writel(v,c)		({ __iowmb(); writel_relaxed((v),(c)); })
 /*2017-08-22 add for dash adapter update*/
 #define writel_dash(v, c)		({ writel_relaxed_dash((v), (c)); })
-
 #define writeq(v,c)		({ __iowmb(); writeq_relaxed((v),(c)); })
 
 #define readb_no_log(c)		({ u8  __v = readb_relaxed_no_log(c); __iormb(); __v; })

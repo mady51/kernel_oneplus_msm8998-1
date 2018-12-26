@@ -321,7 +321,6 @@ static struct of_device_id tsens_match[] = {
 	{}
 };
 
-static struct tsens_tm_device *tmdev;
 
 static struct tsens_tm_device *tsens_controller_is_present(void)
 {
@@ -861,6 +860,7 @@ static int tsens_tz_get_temp(struct thermal_zone_device *thermal,
 	if (!tm_sensor || !temp)
 		return -EINVAL;
 
+	tmdev = tm_sensor->tm;
 
 	if (!tmdev)
 		return -EINVAL;
@@ -1419,6 +1419,9 @@ static void tsens_poll(struct work_struct *work)
 
 	if (tmdev->tsens_critical_poll) {
 		msleep(TSENS_DEBUG_POLL_MS);
+		/* Read sensor_status */
+		mb();
+
 		sensor_status_addr = TSENS_TM_SN_STATUS(tmdev->tsens_addr);
 
 		spin_lock_irqsave(&tmdev->tsens_crit_lock, flags);
@@ -2391,6 +2394,7 @@ static int tsens_tm_probe(struct platform_device *pdev)
 	struct device_node *of_node = pdev->dev.of_node;
 	int rc, i;
 	u32 tsens_num_sensors;
+	struct tsens_tm_device *tmdev = NULL;
 	rc = of_property_read_u32(of_node,
 			"qcom,sensors", &tsens_num_sensors);
 	tmdev = devm_kzalloc(&pdev->dev,

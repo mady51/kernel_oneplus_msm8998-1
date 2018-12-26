@@ -128,5 +128,4 @@ obj-$(CONFIG_CEPH_FS)		+= ceph/
 obj-$(CONFIG_PSTORE)		+= pstore/
 obj-$(CONFIG_EFIVAR_FS)		+= efivarfs/
 
-# liochen@filesystem, 2016/12/03, Support NTFS and EXFAT in kernel
 obj-$(CONFIG_EXFAT_FS)		+= exfat/

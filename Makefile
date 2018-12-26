@@ -417,16 +417,7 @@ KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 
-#CFLAGS_KERNEL +=   -DJUST_FOR_BRINGUP
-
-
-# Anderson 2016/12/20, Add build flag to build f2fs image
-ifeq ($(OEM_USE_F2FS),true)
-KBUILD_CFLAGS +=   -DOEM_USE_F2FS
-KBUILD_CPPFLAGS += -DOEM_USE_F2FS
-CFLAGS_KERNEL +=   -DOEM_USE_F2FS
-CFLAGS_MODULE +=   -DOEM_USE_F2FS
-endif
+CFLAGS_KERNEL +=   -DJUST_FOR_BRINGUP
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)

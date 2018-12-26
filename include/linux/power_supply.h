@@ -118,7 +118,6 @@ enum {
 enum power_supply_property {
 	/* Properties of type `int' */
 	POWER_SUPPLY_PROP_STATUS = 0,
-/* david.liu@bsp, 20160926 Add dash charging */
 	POWER_SUPPLY_PROP_SET_ALLOW_READ_EXTERN_FG_IIC,
 	POWER_SUPPLY_PROP_CC_TO_CV_POINT,
 	POWER_SUPPLY_PROP_CHG_PROTECT_STATUS,
@@ -310,7 +309,6 @@ enum power_supply_type {
 	POWER_SUPPLY_TYPE_TYPEC,	/* Type-C */
 	POWER_SUPPLY_TYPE_UFP,		/* Type-C UFP */
 	POWER_SUPPLY_TYPE_DFP,		/* TYpe-C DFP */
-/* david.liu@bsp, 20161109 Charging porting */
 	POWER_SUPPLY_TYPE_DASH,
 };
 

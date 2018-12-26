@@ -69,7 +69,6 @@ struct fuse_mount_data {
 	unsigned flags;
 	unsigned max_read;
 	unsigned blksize;
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 	unsigned reserved_mem;
 };
 
@@ -390,7 +389,6 @@ static void fuse_put_super(struct super_block *sb)
 	fuse_conn_put(fc);
 }
 
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 static int handle_reserved_statfs(struct kstatfs *stbuf, u32 reserved_mem)
 {
 	u32 reserved_blocks;
@@ -457,7 +455,6 @@ static int fuse_statfs(struct dentry *dentry, struct kstatfs *buf)
 	if (!err)
 		convert_fuse_statfs(buf, &outarg.st);
 
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 	if(!err && fc->reserved_mem != 0)
 		handle_reserved_statfs(buf,fc->reserved_mem);
 
@@ -473,7 +470,6 @@ enum {
 	OPT_ALLOW_OTHER,
 	OPT_MAX_READ,
 	OPT_BLKSIZE,
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 	OPT_RESERVED_MEM,
 	OPT_ERR
 };
@@ -487,7 +483,6 @@ static const match_table_t tokens = {
 	{OPT_ALLOW_OTHER,		"allow_other"},
 	{OPT_MAX_READ,			"max_read=%u"},
 	{OPT_BLKSIZE,			"blksize=%u"},
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 	{OPT_RESERVED_MEM,		"reserved_mem=%u"},
 	{OPT_ERR,			NULL}
 };
@@ -574,7 +569,6 @@ static int parse_fuse_opt(char *opt, struct fuse_mount_data *d, int is_bdev)
 			d->blksize = value;
 			break;
 
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 		case OPT_RESERVED_MEM:
 			if (match_int(&args[0], &value))
 				return 0;
@@ -609,7 +603,6 @@ static int fuse_show_options(struct seq_file *m, struct dentry *root)
 	if (sb->s_bdev && sb->s_blocksize != FUSE_DEFAULT_BLKSIZE)
 		seq_printf(m, ",blksize=%lu", sb->s_blocksize);
 
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 	if(fc->reserved_mem != 0)
 		seq_printf(m, ",reserved_mem=%uMB",fc->reserved_mem);
 
@@ -1158,7 +1151,6 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 	fc->group_id = d.group_id;
 	fc->max_read = max_t(unsigned, 4096, d.max_read);
 
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 	fc->reserved_mem = d.reserved_mem;
 
 	/* Used by get_root_inode() */

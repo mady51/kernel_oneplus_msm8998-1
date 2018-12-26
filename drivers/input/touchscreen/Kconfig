@@ -1229,10 +1229,9 @@ config TOUCHSCREEN_SYNAPTICS_S3320_I2C_RMI
 	tristate "Synaptics s3320 i2c touchscreen"
 	depends on I2C
 	help
-	  Say Y here if you have a Goodix GT9xx touchscreen.
-	  Gt9xx controllers are multi touch controllers which can
-	  report 5 touches at a time.
-	  This enables support for Synaptics s1302 RMI over I2C based touch key.
+	  Say Y here if you have a Synaptics s3320 Touchscreen.
+
+	  If unsure, say N.
 
 
 config TOUCHSCREEN_ST

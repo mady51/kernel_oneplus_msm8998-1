@@ -9,7 +9,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-/* david.liu@bsp, 20161014 Add charging standard */
 #define pr_fmt(fmt) "SMB2: %s: " fmt, __func__
 
 #include <linux/debugfs.h>
@@ -183,7 +182,6 @@ struct smb2 {
 	bool			bad_part;
 };
 
-/* david.liu@bsp, 20161109 Charging porting */
 static int smbchg_cutoff_volt_with_charger = 3240;
 struct smb_charger *g_chip;
 module_param_named(
@@ -210,11 +208,10 @@ do {									\
 } while (0)
 
 #ifdef	CONFIG_OP_DEBUG_CHG
-	static int __debug_mask = PR_OP_DEBUG;
+static int __debug_mask = PR_OP_DEBUG;
 #else
-	static int __debug_mask;
+static int __debug_mask;
 #endif
-
 module_param_named(
 	debug_mask, __debug_mask, int, S_IRUSR | S_IWUSR
 );
@@ -242,7 +239,6 @@ static int smb2_parse_dt(struct smb2 *chip)
 		return -EINVAL;
 	}
 
-/* david.liu@bsp, 20161014 Add charging standard */
 	/* read ibatmax setting for different temp regions */
 	OF_PROP_READ(node, "ibatmax-little-cold-ma",
 			chg->ibatmax[BATT_TEMP_LITTLE_COLD], rc, 1);
@@ -547,7 +543,6 @@ static int smb2_usb_get_prop(struct power_supply *psy,
 		else
 			val->intval = chg->typec_mode;
 		break;
-/* david.liu@bsp, 20170414 Add otg switch */
 	case POWER_SUPPLY_PROP_OTG_SWITCH:
 		val->intval = chg->otg_switch;
 		break;
@@ -629,7 +624,7 @@ static int smb2_usb_set_prop(struct power_supply *psy,
 
 	/*when usb is plug out, some prop can't be set */
 	mutex_lock(&chg->lock);
-/* david.liu@bsp, 20170417 Fix otg switch */
+
 	if (!chg->typec_present && psp != POWER_SUPPLY_PROP_OTG_SWITCH) {
 		rc = -EINVAL;
 		goto unlock;
@@ -639,7 +634,6 @@ static int smb2_usb_set_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_PD_CURRENT_MAX:
 		rc = smblib_set_prop_pd_current_max(chg, val);
 		break;
-/* david.liu@bsp, 20170414 Add otg switch */
 	case POWER_SUPPLY_PROP_OTG_SWITCH:
 		rc = op_set_prop_otg_switch(chg, val);
 		break;
@@ -689,7 +683,6 @@ static int smb2_usb_prop_is_writeable(struct power_supply *psy,
 		enum power_supply_property psp)
 {
 	switch (psp) {
-/* david.liu@bsp, 20170414 Add otg switch */
 	case POWER_SUPPLY_PROP_OTG_SWITCH:
 	case POWER_SUPPLY_PROP_CTM_CURRENT_MAX:
 		return 1;
@@ -1056,7 +1049,6 @@ static enum power_supply_property smb2_batt_props[] = {
 	POWER_SUPPLY_PROP_PRESENT,
 	POWER_SUPPLY_PROP_CHARGE_TYPE,
 	POWER_SUPPLY_PROP_CAPACITY,
-/* david.liu@bsp, 20160926 Add dash charging */
 	POWER_SUPPLY_PROP_CHARGE_NOW,
 	POWER_SUPPLY_PROP_CHG_PROTECT_STATUS,
 	POWER_SUPPLY_PROP_FASTCHG_STATUS,
@@ -1098,7 +1090,6 @@ static int smb2_batt_get_prop(struct power_supply *psy,
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_STATUS:
-/* david.liu@bsp, 20161014 Add charging standard */
 		val->intval = get_prop_batt_status(chg);
 		break;
 	case POWER_SUPPLY_PROP_HEALTH:
@@ -1116,7 +1107,6 @@ static int smb2_batt_get_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_CAPACITY:
 		rc = smblib_get_prop_batt_capacity(chg, val);
 		break;
-/* david.liu@bsp, 20160926 Add dash charging */
 	case POWER_SUPPLY_PROP_CHARGE_NOW:
 		rc = smblib_get_prop_usb_voltage_now(chg, val);
 		break;
@@ -1246,7 +1236,6 @@ static int smb2_batt_set_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL:
 		rc = smblib_set_prop_system_temp_level(chg, val);
 		break;
-/* david.liu@bsp, 20160926 Add dash charging */
 	case POWER_SUPPLY_PROP_CHECK_USB_UNPLUG:
 		if (chg->vbus_present && !chg->dash_present)
 			update_dash_unplug_status();
@@ -1371,7 +1360,6 @@ static int smb2_batt_prop_is_writeable(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_INPUT_SUSPEND:
 	case POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL:
 	case POWER_SUPPLY_PROP_CAPACITY:
-/* david.liu@bsp, 20161014 Add charging standard */
 	case POWER_SUPPLY_PROP_CHARGE_NOW:
 	case POWER_SUPPLY_PROP_TEMP:
 	case POWER_SUPPLY_PROP_CHG_PROTECT_STATUS:
@@ -1581,7 +1569,6 @@ static int smb2_configure_typec(struct smb_charger *chg)
 			"Couldn't configure Type-C interrupts rc=%d\n", rc);
 		return rc;
 	}
-/* david.liu@bsp, 20170414 Add otg switch */
 	if (chg->otg_switch) {
 		/* restore it back to 0xA5 */
 		rc = smblib_write(chg, TM_IO_DTEST4_SEL, 0xA5);
@@ -1730,7 +1717,6 @@ static int smb2_init_hw(struct smb2 *chip)
 				&chg->default_icl_ua);
 	if (chip->dt.usb_icl_ua < 0)
 		chip->dt.usb_icl_ua = chg->default_icl_ua;
-/* david.liu@bsp, 20160926 Add dash charging */
 	pr_info("vbat_max=%d, ibat_max=%d, iusb_max=%d\n",
 		chg->batt_profile_fv_uv,
 		chg->batt_profile_fcc_ua, chip->dt.usb_icl_ua);
@@ -1806,6 +1792,22 @@ static int smb2_init_hw(struct smb2 *chip)
 			chg->micro_usb_mode, 0);
 	vote(chg->hvdcp_enable_votable, MICRO_USB_VOTER,
 			chg->micro_usb_mode, 0);
+	/* disable HVDCP */
+	rc = smblib_masked_write(chg, USBIN_OPTIONS_1_CFG_REG,
+		HVDCP_EN_BIT, 0);
+	if (rc < 0)
+		dev_err(chg->dev, "Couldn't disable HVDCP rc=%d\n", rc);
+	rc = smblib_masked_write(chg, USBIN_SOURCE_CHANGE_INTRPT_ENB_REG,
+			SLOW_IRQ_EN_CFG_BIT, 0);
+	if (rc < 0)
+		dev_err(chg->dev,
+				"Couldn't clean slow plugin irq=%d\n", rc);
+
+	/* aicl rerun time */
+	rc = smblib_masked_write(chg, AICL_RERUN_TIME_CFG_REG,
+		BIT(0)|BIT(1), 0);
+	if (rc < 0)
+		dev_err(chg->dev, "Couldn't set aicl rerunTimerc=%d\n", rc);
 
 	/* disable HVDCP */
 	rc = smblib_masked_write(chg, USBIN_OPTIONS_1_CFG_REG,
@@ -1889,7 +1891,6 @@ static int smb2_init_hw(struct smb2 *chip)
 			"Couldn't configure VBUS for SW control rc=%d\n", rc);
 		return rc;
 	}
-
 	val = (ilog2(chip->dt.wd_bark_time / 16) << BARK_WDOG_TIMEOUT_SHIFT) &
 						BARK_WDOG_TIMEOUT_MASK;
 	val |= BITE_WDOG_TIMEOUT_8S;
@@ -2126,7 +2127,6 @@ static int smb2_chg_config_init(struct smb2 *chip)
 		return -EINVAL;
 	}
 
-/* david.liu@bsp, 20170317 Improve coldboot time */
 	pr_info("PMI8998 Revision=0x%x\n", pmic_rev_id->rev4);
 	return 0;
 }
@@ -2522,7 +2522,6 @@ static const struct file_operations proc_ship_mode_operations = {
 	.llseek		= noop_llseek,
 };
 #endif
-
 static int smb2_probe(struct platform_device *pdev)
 {
 	struct smb2 *chip;
@@ -2572,6 +2571,7 @@ static int smb2_probe(struct platform_device *pdev)
 
 	/* set driver data before resources request it */
 	platform_set_drvdata(pdev, chip);
+	op_charge_info_init(chg);
 
 /* david.liu@bsp, 20161014 Add charging standard */
 	op_charge_info_init(chg);
@@ -2738,9 +2738,8 @@ static int smb2_remove(struct platform_device *pdev)
 	struct smb2 *chip = platform_get_drvdata(pdev);
 	struct smb_charger *chg = &chip->chg;
 
-/* david.liu@bsp, 20170330 Fix system crash */
 	if (chg->usb_psy)
-		power_supply_unregister(chg->usb_psy);
+		power_supply_unregister(chg->batt_psy);
 	if (chg->batt_psy)
 		power_supply_unregister(chg->batt_psy);
 	if (chg->vconn_vreg && chg->vconn_vreg->rdev)

@@ -1892,7 +1892,7 @@ static int msm_serial_remove(struct platform_device *pdev)
 {
 	struct uart_port *port = platform_get_drvdata(pdev);
 
-	msm_power(port,3,0);
+	msm_power(port, 3, 0);
 	uart_remove_one_port(&msm_uart_driver, port);
 
 	return 0;

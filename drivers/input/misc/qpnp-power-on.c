@@ -203,6 +203,8 @@ struct pon_regulator {
 	bool			enabled;
 };
 	struct delayed_work	press_work;
+	struct work_struct  up_work;
+	atomic_t       press_count;
 static int pon_ship_mode_en;
 module_param_named(
 	ship_mode_en, pon_ship_mode_en, int, 0600
@@ -849,15 +851,11 @@ qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 	 * simulate press event in case release event occurred
 	 * without a press event
 	 */
-	if (!cfg->old_state && !key_status) {
-		input_report_key(pon->pon_input, cfg->key_code, 1);
-		input_sync(pon->pon_input);
-	}
-
 	input_report_key(pon->pon_input, cfg->key_code, key_status);
 	input_sync(pon->pon_input);
 
 	cfg->old_state = !!key_status;
+
 
 	return 0;
 }
@@ -1017,14 +1015,16 @@ int check_powerkey_count(int press)
 	int ret=0;
 	int param_poweroff_count=0;
 
-	ret = get_param_poweroff_count(&param_poweroff_count);
+	ret = get_param_by_index_and_offset(13, 0x30, &param_poweroff_count,
+		sizeof(param_poweroff_count));
 
 	if(press)
 		param_poweroff_count ++ ;
 	else
 		param_poweroff_count -- ;
 
-	ret = set_param_poweroff_count(&param_poweroff_count);
+	ret = set_param_by_index_and_offset(13, 0x30, &param_poweroff_count,
+		sizeof(param_poweroff_count));
 	pr_info("param_poweroff_count=%d \n",param_poweroff_count);
 	return 0;
 }
@@ -2406,6 +2406,17 @@ static int qpnp_pon_probe(struct platform_device *pdev)
 				pon->num_pon_config,
 				sizeof(struct qpnp_pon_config),
 				GFP_KERNEL);
+
+	for (i = 0; i < 16; i++) {
+		rc = regmap_read(pon->regmap, ((pon)->base + 0xC0+i), &reg);
+		dev_info(&pdev->dev, "(0x%x:0x%x)\n",
+			((pon)->base + 0xC0+i), reg);
+		if (rc) {
+			dev_err(&pon->pdev->dev, "Unable to read addr=0x%x, rc(%d)\n",
+			((pon)->base + 0xC0+i), rc);
+			return rc;
+		}
+	}
 
 	for (i = 0; i < 16; i++) {
 		rc = regmap_read(pon->regmap, ((pon)->base + 0xC0+i), &reg);

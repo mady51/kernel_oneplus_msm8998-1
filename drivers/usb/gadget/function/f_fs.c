@@ -590,6 +590,10 @@ static int ffs_ep0_open(struct inode *inode, struct file *file)
 	ffs_log("state %d setup_state %d flags %lu opened %d", ffs->state,
 		ffs->setup_state, ffs->flags, atomic_read(&ffs->opened));
 
+	ret = ffs_inst_exist_check(ffs->dev_name);
+	if (ret < 0)
+		return ret;
+
 	if (unlikely(ffs->state == FFS_CLOSING)) {
 		pr_err("FFS_CLOSING!\n");
 		return -EBUSY;

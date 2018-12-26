@@ -262,4 +262,4 @@ oem Oneplus Technologies
 oneplus OnePlus Technologies
 fpc fpc1020
 HWK synaptics
-android Android O
+android Android P

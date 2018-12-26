@@ -297,7 +297,8 @@ int extcon_update_state(struct extcon_dev *edev, u32 mask, u32 state)
 		for (index = 0; index < edev->max_supported; index++) {
 			if (is_extcon_changed(old_state, edev->state, index,
 					      &attached)) {
-				dev_err(&edev->dev, "index=%d,attached=%d\n", index, attached);
+				dev_err(&edev->dev, "index=%d,attached=%d\n",
+						index, attached);
 				raw_notifier_call_chain(&edev->nh[index],
 							attached, edev);
 			}

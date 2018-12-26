@@ -446,6 +446,8 @@ struct mdss_dsi_ctrl_pdata {
 	struct clk *pixel_clk_rcg;
 	struct clk *vco_dummy_clk;
 	struct clk *byte_intf_clk;
+	struct mutex panel_mode_lock;
+	//#endif
 	u8 ctrl_state;
 	int panel_mode;
 	int irq_cnt;
@@ -521,6 +523,9 @@ struct mdss_dsi_ctrl_pdata {
 	struct completion bta_comp;
 	spinlock_t irq_lock;
 	spinlock_t mdp_lock;
+#if defined(CONFIG_IRIS2_FULL_SUPPORT) || defined(CONFIG_IRIS2P_FULL_SUPPORT)
+	spinlock_t iris_lock;
+#endif
 	int mdp_busy;
 	struct mutex mutex;
 	struct mutex cmd_mutex;
@@ -574,40 +579,31 @@ struct mdss_dsi_ctrl_pdata {
 	int m_mdp_vote_cnt;
 	/* debugfs structure */
 	struct mdss_dsi_debugfs_info *debugfs_info;
-
 	struct dsi_err_container err_cont;
-	struct mutex panel_mode_lock;
-//#endif
-    bool is_panel_on;
-//#endif
-    bool high_brightness_panel;
-//#endif
-    bool bl_high2bit;
-    int  disp_poc_en_gpio;
-//#endif
-	int acl_mode;
-	struct dsi_panel_cmds acl_cmds;
-	int acl_ncmds;
-	int acl_npayload;
-//#endif
-	struct dsi_panel_cmds hbm_on_cmds;
-	struct dsi_panel_cmds hbm_off_cmds;
-	int  hbm_mode;
-//#endif
+
+	struct delayed_work techeck_work;
+	struct completion te_comp;
+
+	int disp_vci_en_gpio;
+	int disp_poc_en_gpio;
+
+
+	bool is_panel_on;
 	bool setting_mode_loaded;
-//#endif
+
 	int SRGB_mode;
 	struct dsi_panel_cmds srgb_on_cmds;
 	struct dsi_panel_cmds srgb_off_cmds;
-//#endif
+
+
 	int Adobe_RGB_mode;
 	struct dsi_panel_cmds Adobe_RGB_on_cmds;
 	struct dsi_panel_cmds Adobe_RGB_off_cmds;
-//#endif
+
 	int dci_p3_mode;
 	struct dsi_panel_cmds dci_p3_on_cmds;
 	struct dsi_panel_cmds dci_p3_off_cmds;
-//#endif
+
 	int night_mode;
 	struct dsi_panel_cmds night_mode_on_cmds;
 	struct dsi_panel_cmds night_mode_off_cmds;
@@ -617,31 +613,19 @@ struct mdss_dsi_ctrl_pdata {
 	int adaption_mode;
 	struct dsi_panel_cmds adaption_mode_on_cmds;
 	struct dsi_panel_cmds adaption_mode_off_cmds;
-//#endif
-	struct dsi_panel_cmds panel_serial_num_cmds;
-	int panel_year;
-	int panel_mon;
-	int panel_day;
-	int panel_hour;
-	int panel_min;
-    int panel_year_index;
-	int panel_mon_index;
-	int panel_day_index;
-	int panel_hour_index;
-	int panel_min_index;
-//#endif
-	int disp_vci_en_gpio;
-	struct delayed_work techeck_work;
-	struct completion te_comp;
-//#endif
+
+
+	int px_clk_req_gpio;
+	int px_clk_clk_en_gpio;
 	const char *px_clk_src_name;
 	struct	clk	*px_clk_src;
 	int px_clk_enabled;
 	int px_bp_gpio;
-	int px_1v1_en_gpio;
-    spinlock_t iris_lock;
-    bool iris_enabled;
-//#endif
+	int isp_1v1_en_gpio;
+	bool bl_high2bit;
+	bool high_brightness_panel;
+
+
 	struct kobject *kobj;
 	int fb_node;
 
@@ -671,6 +655,44 @@ struct dsi_status_data {
 	struct delayed_work check_status;
 	struct msm_fb_data_type *mfd;
 };
+
+int mdss_dsi_panel_set_srgb_mode(struct mdss_dsi_ctrl_pdata *ctrl, int level);
+int mdss_dsi_panel_get_srgb_mode(struct mdss_dsi_ctrl_pdata *ctrl);
+
+
+int mdss_dsi_panel_set_adobe_rgb_mode
+	(struct mdss_dsi_ctrl_pdata *ctrl, int level);
+int mdss_dsi_panel_get_adobe_rgb_mode
+	(struct mdss_dsi_ctrl_pdata *ctrl);
+
+
+int mdss_dsi_panel_set_dci_p3_mode
+	(struct mdss_dsi_ctrl_pdata *ctrl, int level);
+int mdss_dsi_panel_get_dci_p3_mode(struct mdss_dsi_ctrl_pdata *ctrl);
+
+
+int mdss_dsi_panel_set_night_mode
+	(struct mdss_dsi_ctrl_pdata *ctrl, int level);
+int mdss_dsi_panel_get_night_mode
+	(struct mdss_dsi_ctrl_pdata *ctrl);
+
+
+int mdss_dsi_panel_set_oneplus_mode
+	(struct mdss_dsi_ctrl_pdata *ctrl, int level);
+int mdss_dsi_panel_get_oneplus_mode(struct mdss_dsi_ctrl_pdata *ctrl);
+
+
+int mdss_dsi_panel_set_adaption_mode
+	(struct mdss_dsi_ctrl_pdata *ctrl, int level);
+int mdss_dsi_panel_get_adaption_mode(struct mdss_dsi_ctrl_pdata *ctrl);
+
+
+int mdss_dsi_disp_poc_en(struct mdss_panel_data *pdata, int enable);
+int mdss_dsi_px_clk_req(struct mdss_panel_data *pdata, int enable);
+int mdss_dsi_disp_vci_en(struct mdss_panel_data *pdata, int enable);
+int mdss_dsi_isp_1v1_en(struct mdss_panel_data *pdata, int enable);
+
+/* #endif */
 
 void mdss_dsi_read_hw_revision(struct mdss_dsi_ctrl_pdata *ctrl);
 int dsi_panel_device_register(struct platform_device *ctrl_pdev,

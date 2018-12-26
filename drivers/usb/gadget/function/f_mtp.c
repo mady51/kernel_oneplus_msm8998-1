@@ -451,7 +451,7 @@ static inline struct mtp_dev *func_to_mtp(struct usb_function *f)
 {
 	return container_of(f, struct mtp_dev, function);
 }
-/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+/*2016/12/09, Add fix memory for MTP*/
 static struct usb_request *mtp_request_new(struct usb_ep *ep,
 	int buffer_size, enum buf_type type)
 {
@@ -461,7 +461,7 @@ static struct usb_request *mtp_request_new(struct usb_ep *ep,
 		return NULL;
 
 	/* now allocate buffers for the requests */
-	/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+	/*2016/12/09, Add fix memory for MTP*/
 	if (useFixAddr == true) {
 		if (type == TX_BUFFER)
 			req->buf = __va(MTP_TX_BUFFER_BASE + mtpBufferOffset);
@@ -478,7 +478,7 @@ static struct usb_request *mtp_request_new(struct usb_ep *ep,
 		return NULL;
 	}
 
-	/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+	/*2016/12/09, Add fix memory for MTP*/
 	if (useFixAddr == true) {
 		if (buffer_size == INTR_BUFFER_SIZE)
 			mtpBufferOffset += 0x40; /*alignment*/
@@ -492,7 +492,7 @@ static struct usb_request *mtp_request_new(struct usb_ep *ep,
 static void mtp_request_free(struct usb_request *req, struct usb_ep *ep)
 {
 	if (req) {
-		/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+		/*2016/12/09, Add fix memory for MTP*/
 		if (useFixAddr == true) {
 			req->buf = NULL;
 			mtpBufferOffset = 0;
@@ -622,7 +622,7 @@ static int mtp_create_bulk_endpoints(struct mtp_dev *dev,
 	dev->ep_intr = ep;
 
 retry_tx_alloc:
-	/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+	/*2016/12/09, Add fix memory for MTP*/
 	if (mtp_tx_req_len == MTP_TX_BUFFER_INIT_SIZE
 		&& mtp_rx_req_len == MTP_RX_BUFFER_INIT_SIZE
 		&& mtp_tx_reqs == MTP_TX_REQ_MAX)
@@ -633,7 +633,7 @@ retry_tx_alloc:
 	mtpBufferOffset = 0;
 	/* now allocate requests for our endpoints */
 	for (i = 0; i < mtp_tx_reqs; i++) {
-		/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+		/*2016/12/09, Add fix memory for MTP*/
 		req = mtp_request_new(dev->ep_in, mtp_tx_req_len, TX_BUFFER);
 		if (!req) {
 			if (mtp_tx_req_len <= MTP_BULK_BUFFER_SIZE)
@@ -658,10 +658,10 @@ retry_tx_alloc:
 		mtp_rx_req_len = MTP_BULK_BUFFER_SIZE;
 
 retry_rx_alloc:
-	/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+	/*2016/12/09, Add fix memory for MTP*/
 	mtpBufferOffset = 0;
 	for (i = 0; i < RX_REQ_MAX; i++) {
-		/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+		/*2016/12/09, Add fix memory for MTP*/
 		req = mtp_request_new(dev->ep_out, mtp_rx_req_len, RX_BUFFER);
 		if (!req) {
 			if (mtp_rx_req_len <= MTP_BULK_BUFFER_SIZE)
@@ -674,10 +674,10 @@ retry_rx_alloc:
 		req->complete = mtp_complete_out;
 		dev->rx_req[i] = req;
 	}
-	/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+	/*2016/12/09, Add fix memory for MTP*/
 	mtpBufferOffset = 0;
 	for (i = 0; i < INTR_REQ_MAX; i++) {
-		/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+		/*2016/12/09, Add fix memory for MTP*/
 		req = mtp_request_new(dev->ep_intr,
 			INTR_BUFFER_SIZE, INTR_BUFFER);
 		if (!req)
@@ -685,7 +685,7 @@ retry_rx_alloc:
 		req->complete = mtp_complete_intr;
 		mtp_req_put(dev, &dev->intr_idle, req);
 	}
-	/*Anderson@, 2016/12/09, Add fix memory for MTP*/
+	/*2016/12/09, Add fix memory for MTP*/
 	mtpBufferOffset = 0;
 
 	return 0;
@@ -917,11 +917,11 @@ static void send_file_work(struct work_struct *data)
 		pm_qos_update_request(&big_cpu_mtp_freq, MAX_CPUFREQ - 1);
 	} else {
 		pm_qos_update_request_timeout(&devfreq_mtp_request,
-		MAX_CPUFREQ, PM_QOS_TIMEOUT);
+			MAX_CPUFREQ, PM_QOS_TIMEOUT);
 		pm_qos_update_request_timeout(&little_cpu_mtp_freq,
-		MAX_CPUFREQ, PM_QOS_TIMEOUT);
+			MAX_CPUFREQ, PM_QOS_TIMEOUT);
 		pm_qos_update_request_timeout(&big_cpu_mtp_freq,
-		MAX_CPUFREQ-1, PM_QOS_TIMEOUT);
+			MAX_CPUFREQ-1, PM_QOS_TIMEOUT);
 	}
 
 	if (dev->xfer_send_header) {
@@ -1048,6 +1048,11 @@ static void receive_file_work(struct work_struct *data)
 	if (!IS_ALIGNED(count, dev->ep_out->maxpacket))
 		DBG(cdev, "%s- count(%lld) not multiple of mtu(%d)\n", __func__,
 						count, dev->ep_out->maxpacket);
+	if (delayed_work_pending(&cpu_freq_qos_work))
+		cancel_delayed_work(&cpu_freq_qos_work);
+	pm_qos_update_request(&devfreq_mtp_request, MAX_CPUFREQ);
+	pm_qos_update_request(&little_cpu_mtp_freq, MAX_CPUFREQ);
+	pm_qos_update_request(&big_cpu_mtp_freq, MAX_CPUFREQ - 1);
 
 	if (delayed_work_pending(&cpu_freq_qos_work))
 		cancel_delayed_work(&cpu_freq_qos_work);
@@ -1158,8 +1163,7 @@ static void receive_file_work(struct work_struct *data)
 		}
 	}
 
-	queue_delayed_work(cpu_freq_qos_queue, &cpu_freq_qos_work,
-		msecs_to_jiffies(1000)*3);
+	queue_delayed_work(cpu_freq_qos_queue, &cpu_freq_qos_work, msecs_to_jiffies(1000)*3);
 	DBG(cdev, "receive_file_work returning %d\n", r);
 	/* write the result */
 	dev->xfer_result = r;
@@ -1431,6 +1435,7 @@ static int mtp_release(struct inode *ip, struct file *fp)
 		mtp_receive_flag = false;
 		msm_cpuidle_set_sleep_disable(false);
 	}
+
 	mtp_unlock(&_mtp_dev->open_excl);
 	return 0;
 }
@@ -1870,9 +1875,10 @@ static int __mtp_setup(struct mtp_instance *fi_mtp)
 
 	cpu_freq_qos_queue = create_singlethread_workqueue("f_mtp_qos");
 	INIT_DELAYED_WORK(&cpu_freq_qos_work, update_qos_request);
-	pm_qos_add_request(&little_cpu_mtp_freq, PM_QOS_C0_CPUFREQ_MIN, MIN_CPUFREQ);
 	pm_qos_add_request(&devfreq_mtp_request, PM_QOS_DEVFREQ_MIN, MIN_CPUFREQ);
+	pm_qos_add_request(&little_cpu_mtp_freq, PM_QOS_C0_CPUFREQ_MIN, MIN_CPUFREQ);
 	pm_qos_add_request(&big_cpu_mtp_freq, PM_QOS_C1_CPUFREQ_MIN, MIN_CPUFREQ);
+
 	_mtp_dev = dev;
 
 	ret = misc_register(&mtp_device);
@@ -2032,6 +2038,7 @@ static void mtp_free(struct usb_function *f)
 {
 	/*NO-OP: no function specific resource allocation in mtp_alloc*/
 	struct mtp_instance *fi_mtp;
+
 	fi_mtp = container_of(f->fi, struct mtp_instance, func_inst);
 	fi_mtp->func_inst.f = NULL;
 }

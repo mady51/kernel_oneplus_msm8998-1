@@ -131,68 +131,67 @@ static struct pm_qos_object memory_bandwidth_pm_qos = {
 
 static BLOCKING_NOTIFIER_HEAD(c0_cpufreq_max_notifier);
 static struct pm_qos_constraints c0_cpufreq_max_constraints = {
-	.list = PLIST_HEAD_INIT(c0_cpufreq_max_constraints.list),
-	.target_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
+        .list = PLIST_HEAD_INIT(c0_cpufreq_max_constraints.list),
+        .target_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
 	.target_per_cpu = { [0 ... (NR_CPUS - 1)] =
 				PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE },
-	.default_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
-	.no_constraint_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
-	.type = PM_QOS_MIN,
-	.notifiers = &c0_cpufreq_max_notifier,
+        .default_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
+        .no_constraint_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
+        .type = PM_QOS_MIN,
+        .notifiers = &c0_cpufreq_max_notifier,
 };
 static struct pm_qos_object c0_cpufreq_max_pm_qos = {
-	.constraints = &c0_cpufreq_max_constraints,
-	.name = "c0_cpufreq_max",
+        .constraints = &c0_cpufreq_max_constraints,
+        .name = "c0_cpufreq_max",
 };
 
 
 static BLOCKING_NOTIFIER_HEAD(c0_cpufreq_min_notifier);
 static struct pm_qos_constraints c0_cpufreq_min_constraints = {
-	.list = PLIST_HEAD_INIT(c0_cpufreq_min_constraints.list),
-	.target_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
+        .list = PLIST_HEAD_INIT(c0_cpufreq_min_constraints.list),
+        .target_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
 	.target_per_cpu = { [0 ... (NR_CPUS - 1)] =
 				PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE },
-	.default_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
-	.no_constraint_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
-	.type = PM_QOS_MAX,
-	.notifiers = &c0_cpufreq_min_notifier,
+        .default_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
+        .no_constraint_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
+        .type = PM_QOS_MAX,
+        .notifiers = &c0_cpufreq_min_notifier,
 };
 static struct pm_qos_object c0_cpufreq_min_pm_qos = {
-	.constraints = &c0_cpufreq_min_constraints,
-	.name = "c0_cpufreq_min",
+        .constraints = &c0_cpufreq_min_constraints,
+        .name = "c0_cpufreq_min",
 };
 
 static BLOCKING_NOTIFIER_HEAD(c1_cpufreq_max_notifier);
 static struct pm_qos_constraints c1_cpufreq_max_constraints = {
-	.list = PLIST_HEAD_INIT(c1_cpufreq_max_constraints.list),
-	.target_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
+        .list = PLIST_HEAD_INIT(c1_cpufreq_max_constraints.list),
+        .target_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
 	.target_per_cpu = { [0 ... (NR_CPUS - 1)] =
 				PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE },
-	.default_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
-	.no_constraint_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
-	.type = PM_QOS_MIN,
-	.notifiers = &c1_cpufreq_max_notifier,
+        .default_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
+        .no_constraint_value = PM_QOS_CPUFREQ_MAX_DEFAULT_VALUE,
+        .type = PM_QOS_MIN,
+        .notifiers = &c1_cpufreq_max_notifier,
 };
 static struct pm_qos_object c1_cpufreq_max_pm_qos = {
-	.constraints = &c1_cpufreq_max_constraints,
-	.name = "c1_cpufreq_max",
+        .constraints = &c1_cpufreq_max_constraints,
+        .name = "c1_cpufreq_max",
 };
-
 
 static BLOCKING_NOTIFIER_HEAD(c1_cpufreq_min_notifier);
 static struct pm_qos_constraints c1_cpufreq_min_constraints = {
-	.list = PLIST_HEAD_INIT(c1_cpufreq_min_constraints.list),
-	.target_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
+        .list = PLIST_HEAD_INIT(c1_cpufreq_min_constraints.list),
+        .target_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
 	.target_per_cpu = { [0 ... (NR_CPUS - 1)] =
 				PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE },
-	.default_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
-	.no_constraint_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
-	.type = PM_QOS_MAX,
-	.notifiers = &c1_cpufreq_min_notifier,
+        .default_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
+        .no_constraint_value = PM_QOS_CPUFREQ_MIN_DEFAULT_VALUE,
+        .type = PM_QOS_MAX,
+        .notifiers = &c1_cpufreq_min_notifier,
 };
 static struct pm_qos_object c1_cpufreq_min_pm_qos = {
-	.constraints = &c1_cpufreq_min_constraints,
-	.name = "c1_cpufreq_min",
+        .constraints = &c1_cpufreq_min_constraints,
+        .name = "c1_cpufreq_min",
 };
 
 static BLOCKING_NOTIFIER_HEAD(devfreq_max_notifier);

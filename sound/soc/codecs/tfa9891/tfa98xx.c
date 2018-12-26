@@ -32,9 +32,6 @@
 /*zhiguang.su@MultiMedia.AudioDrv, 2014-4-14, add for l21 power*/
 #include <linux/regulator/consumer.h>
 
-/*zhiguang.su@MultiMedia.AudioDrv, 2015-11-09, add for debug*/
-#include <sound/sounddebug.h>
-
 #define I2C_RETRIES 50
 #define I2C_RETRY_DELAY 5 /* ms */
 /* TODO: remove genregs usage? */
@@ -1647,8 +1644,8 @@ static int tfa98xx_create_controls(struct tfa98xx *tfa98xx)
 		if (tfacont_get_max_vstep(tfa98xx->handle, prof))
 			nr_controls++; /* Playback Volume control */
 	}
-	tfa98xx_controls = devm_kcalloc(tfa98xx->codec->dev,
-			nr_controls, sizeof(tfa98xx_controls[0]), GFP_KERNEL);
+	tfa98xx_controls = devm_kzalloc(tfa98xx->codec->dev,
+			nr_controls * sizeof(tfa98xx_controls[0]), GFP_KERNEL);
 	if(!tfa98xx_controls)
 		return -ENOMEM;
 
@@ -1850,9 +1847,9 @@ static void tfa98xx_add_widgets(struct tfa98xx *tfa98xx)
 	struct snd_soc_dapm_widget *widgets;
 	unsigned int num_dapm_widgets = ARRAY_SIZE(tfa98xx_dapm_widgets_common);
 
-	widgets = devm_kcalloc(&tfa98xx->i2c->dev,
-			ARRAY_SIZE(tfa98xx_dapm_widgets_common),
-			sizeof(struct snd_soc_dapm_widget),
+	widgets = devm_kzalloc(&tfa98xx->i2c->dev,
+			sizeof(struct snd_soc_dapm_widget) *
+				ARRAY_SIZE(tfa98xx_dapm_widgets_common),
 			GFP_KERNEL);
 	if (!widgets)
 		return;

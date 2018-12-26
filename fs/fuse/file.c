@@ -19,7 +19,6 @@
 #include <linux/falloc.h>
 #include <linux/uio.h>
 
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 #include <linux/statfs.h>
 #include <linux/namei.h>
 
@@ -1251,7 +1250,6 @@ static ssize_t fuse_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 	ssize_t err;
 	loff_t endbyte = 0;
 
-/*liochen@filesystems, 2016/12/05, add for reserved memory*/
 	struct kstatfs statfs;
 	u64 avail;
 	size_t size;

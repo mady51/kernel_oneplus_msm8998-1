@@ -442,7 +442,29 @@ static int pl_fcc_vote_callback(struct votable *votable, void *data,
 
 	if (!chip->main_psy)
 		return 0;
+
+	if (!chip->batt_psy) {
+		chip->batt_psy = power_supply_get_by_name("battery");
+		if (!chip->batt_psy)
+			return 0;
+
+		rc = power_supply_get_property(chip->batt_psy,
+				POWER_SUPPLY_PROP_FCC_STEPPER_ENABLE, &pval);
+		if (rc < 0) {
+			pr_err("Couldn't read FCC step update status, rc=%d\n",
+				rc);
+			return rc;
+		}
+		chip->fcc_step_update = pval.intval;
+		pr_debug("FCC Stepper %s\n",
+				pval.intval ? "enabled" : "disabled");
+	}
+
+	if (chip->fcc_step_update)
+		cancel_delayed_work_sync(&chip->fcc_step_update_work);
+
 	pr_info("total_fcc_ua=%d\n", total_fcc_ua);
+
 	if (chip->pl_mode == POWER_SUPPLY_PL_NONE
 	    || get_effective_result_locked(chip->pl_disable_votable)) {
 		pval.intval = total_fcc_ua;
